@@ -93,16 +93,14 @@ function BuyPoisonsItemButton_OnLoad()
 	end
 end
 
-function BuyPoisonsItemButton_OnClick(button)
+function BuyPoisonsItemButton_OnClick(button, ignoreModifiers)
 	if button == "LeftButton" then
-		--PickupMerchantItem(this:GetID())
-	elseif button == "RightButton" then
+		if IsShiftKeyDown() and not ignoreModifiers then
+			if ChatFrameEditBox:IsVisible() then
+				ChatFrameEditBox:Insert(BuyPoisonsItemInfo[this:GetID()]["name"])
+			end
+		end
+	else
 		BuyPoisons_BuyQuantity(this:GetID(),5)
-	end
-end
-
-function BuyPoisonsItemButton_OnShiftClick()
-	if ChatFrameEditBox:IsVisible() then
-		ChatFrameEditBox:Insert(BuyPoisonsItemInfo[this:GetID()]["name"])
 	end
 end

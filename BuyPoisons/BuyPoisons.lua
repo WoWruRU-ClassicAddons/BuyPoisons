@@ -1,8 +1,6 @@
 --Version
 BUYPOISONS_VERSION = GetAddOnMetadata("BuyPoisons", "Version")
 
-Player = UnitName("player")
-Server = GetCVar("realmName")
 BuyPoisons_Is_UI_Open = 0
 loaded = 0
 
@@ -38,25 +36,22 @@ function BuyPoisons_OnEvent(event)
 	if event == "MERCHANT_SHOW" then
 		is_a_poison_vendor = Index_merchant(BUYPOISONS_COMPONENT_FLASH_POWDER)
 		if is_a_poison_vendor then	
-			if BuyPoisonsData[Server][Player]["Restock"]["FlashPowder"] > 0 then
-				BuyPoisons_RestockItem(BUYPOISONS_COMPONENT_FLASH_POWDER, BuyPoisonsData[Server][Player]["Restock"]["FlashPowder"] )
-			end
-			if BuyPoisonsData[Server][Player]["Use_UI"] == 1 then
+			if BuyPoisonsData["Restock"]["FlashPowder"] and BuyPoisonsData["Restock"]["FlashPowder"] > 0 then
+				BuyPoisons_RestockItem(BUYPOISONS_COMPONENT_FLASH_POWDER, BuyPoisonsData["Restock"]["FlashPowder"])
+			elseif BuyPoisonsData["Use_UI"] == 1 then
 				BuyPoisons_ShowUI()
 			end	
 		end
-	end
-	
-	if event == "MERCHANT_CLOSED" then
+	elseif event == "MERCHANT_CLOSED" then
 		BuyPoisonsFrame:Hide()
 	end
 end
 
 function BuyPoisons_command(msg)
 	-- this function handles our chat command
-	if not msg or msg == "help" or msg == "" then
-		if GetMerchantNumItems() == 0 then
-			for i = 1, table.getn(BUYPOISONS_HELP_MESSAGE), 1 do
+	if not msg or msg == "" then
+		if not MerchantFrame:IsVisible() then
+			for i = 1, table.getn(BUYPOISONS_HELP_MESSAGE) do
 				bp_print(BUYPOISONS_HELP_MESSAGE[i])
 			end
 		else
@@ -73,14 +68,14 @@ function BuyPoisons_command(msg)
 			end
 			if poisontype then
 				if poisontype == "rfp" and poisonamount then
-					BuyPoisonsData[Server][Player]["Restock"]["FlashPowder"] = poisonamount
+					BuyPoisonsData["Restock"]["FlashPowder"] = poisonamount
 					bp_print("BuyPoisons stocking " .. poisonamount .. " FlashPowder")
 				end
 			end	
 		end
-		if GetMerchantNumItems() > 1 then
+		if MerchantFrame:IsVisible() then
 			if poisontype then
-				for i = 1 , 21, 1 do
+				for i = 1 , 21 do
 					if poisontype == BuyPoisonsItemInfo[i]["shortkey"] then
 						BuyPoisons_BuyQuantity(i , poisonamount)
 					end
@@ -89,7 +84,7 @@ function BuyPoisons_command(msg)
 				BuyPoisons_ShowUI()
 			end
 		end
-	elseif msg == "force" then
+	elseif msg == "force" and MerchantFrame:IsVisible() then
 		is_a_poison_vendor = Index_merchant(BUYPOISONS_COMPONENT_FLASH_POWDER)
 		if is_a_poison_vendor == nil then
 		  bp_print("Flash powder index: nil")
@@ -103,60 +98,47 @@ end
 function BuyPoisons_Verify_Saved_Data()
 	if not BuyPoisonsData then
 		BuyPoisonsData = {}
-	end
-	if not BuyPoisonsData[Server] then
-		BuyPoisonsData[Server] = {}
-	end
-	if ( not BuyPoisonsData[Server][Player]) then
-		BuyPoisonsData[Server][Player] = {}
-		BuyPoisonsData[Server][Player]["Use_UI"] = 1
-		BuyPoisonsData[Server][Player]["Restock"] = {}
+		BuyPoisonsData["Use_UI"] = 1
+		BuyPoisonsData["Restock"] = {}
 		if GetLocale() == "frFR" then
-			BuyPoisonsData[Server][Player]["Lang"] = "FR"
+			BuyPoisonsData["Lang"] = "FR"
 		elseif GetLocale() == "deDE" then
-			BuyPoisonsData[Server][Player]["Lang"] = "DE"
+			BuyPoisonsData["Lang"] = "DE"
 		elseif GetLocale() == "ruRU" then
-			BuyPoisonsData[Server][Player]["Lang"] = "RU"
+			BuyPoisonsData["Lang"] = "RU"
 		else
-			BuyPoisonsData[Server][Player]["Lang"] = "EN"
+			BuyPoisonsData["Lang"] = "EN"
 		end
-	end
-		if BuyPoisonsData[Server][Player]["Restock"] == nil or BuyPoisonsData[Server][Player]["Restock"] == {} then
-		BuyPoisonsData[Server][Player]["Restock"] = {}
-		BuyPoisonsData[Server][Player]["Restock"]["FlashPowder"] = 0
-	end
-	if BuyPoisonsData[Server][Player]["Restock"]["FlashPowder"] == nil then
-		BuyPoisonsData[Server][Player]["Restock"]["FlashPowder"] = 0
+	elseif BuyPoisonsData["Restock"] == nil or BuyPoisonsData["Restock"] == {} then
+		BuyPoisonsData["Restock"] = {}
+		BuyPoisonsData["Restock"]["FlashPowder"] = 0
+	elseif BuyPoisonsData["Restock"]["FlashPowder"] == nil then
+		BuyPoisonsData["Restock"]["FlashPowder"] = 0
 	end
 end
 
 function BuyPoisons_BuyQuantity(i , BuyPoisons_Purchase_Quantity)
-	for j=1, 2,1 do	
-		if BuyPoisonsItemInfo[i]["Components"][j]["Quantity"] then 
-			
+	for j=1, 2 do	
+		if BuyPoisonsItemInfo[i]["Components"][j]["Quantity"] then
 			BuyPoisons_NumberToBuy = BuyPoisonsItemInfo[i]["Components"][j]["Quantity"] * BuyPoisons_Purchase_Quantity
-			for k = 1, 10, 1 do
-				if BuyPoisons_NumberToBuy > 0 then
-					if BuyPoisons_NumberToBuy > 20 then
-						Buy_Item(BuyPoisonsItemInfo[i]["Components"][j]["Item"], 20)
-						BuyPoisons_NumberToBuy = BuyPoisons_NumberToBuy - 20
-					else
-						Buy_Item(BuyPoisonsItemInfo[i]["Components"][j]["Item"], BuyPoisons_NumberToBuy)
-						BuyPoisons_NumberToBuy = 0 
-					end
+			for k = 1, 10 do
+				if BuyPoisons_NumberToBuy > 20 then
+					Buy_Item(BuyPoisonsItemInfo[i]["Components"][j]["Item"], 20)
+					BuyPoisons_NumberToBuy = BuyPoisons_NumberToBuy - 20
+				elseif BuyPoisons_NumberToBuy > 0 then
+					Buy_Item(BuyPoisonsItemInfo[i]["Components"][j]["Item"], BuyPoisons_NumberToBuy)
+					BuyPoisons_NumberToBuy = 0 
 				end
-			end
-			
+			end		
 		end
 	end
 	BuyPoisons_VialsOnHand = 0
 	--BuyPoisons_VialsOnHand = BuyPoisons_CountMy(BuyPoisonsItemInfo[i]["Vial_Type"])
 	
-	BuyPoisons_VialCount = ((BuyPoisons_Purchase_Quantity- BuyPoisons_VialsOnHand)/5)
+	BuyPoisons_VialCount = (BuyPoisons_Purchase_Quantity - BuyPoisons_VialsOnHand)/5
 	if BuyPoisons_VialCount > 0 then
-		Buy_Item(BuyPoisonsItemInfo[i]["Vial_Type"],BuyPoisons_VialCount)
-	end
-	
+		Buy_Item(BuyPoisonsItemInfo[i]["Vial_Type"], BuyPoisons_VialCount)
+	end	
 end
 
 function Buy_Item(poison, quantity)
@@ -169,7 +151,7 @@ end
 function Index_merchant(item_name)
 	--GetMerchantNumItems()
 	--name, texture, price, quantity, numAvailable, isUsable = GetMerchantItemInfo(index)
-	item_index=nil
+	item_index = nil
 	for i = 1, GetMerchantNumItems() do
 		name, texture, price, quantity, numAvailable, isUsable = GetMerchantItemInfo(i)
 		if name == item_name then
@@ -177,7 +159,7 @@ function Index_merchant(item_name)
 		end
 	end
 	if not item_index and not item_name == BUYPOISONS_COMPONENT_FLASH_POWDER then
-	  DEFAULT_CHAT_FRAME:AddMessage("Can't find: "..item_name,1,1,1)
+		DEFAULT_CHAT_FRAME:AddMessage("Can't find: "..item_name,1,1,1)
 	end
 	return item_index
 end
@@ -204,12 +186,12 @@ function BuyPoisons_RestockItem(item, BuyPoisons_RestockQuantity)
 end
 
 function BuyPoisons_CountMy(item)
-	local texture,itemCount
+	local texture, itemCount
 	local total_itemCount = 0
 	
 	for i = 0,4 do
 		for j = 1, GetContainerNumSlots(i) do
-			if (BuyPoisons_GetContainerItemName(i,j) == item) then
+			if BuyPoisons_GetContainerItemName(i,j) == item then
 				_, itemCount = GetContainerItemInfo(i,j)
 				if itemCount then
 					total_itemCount = total_itemCount + itemCount

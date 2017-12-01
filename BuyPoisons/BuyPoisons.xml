@@ -63,21 +63,17 @@
 				</Anchors>
 				<Scripts>
 					<OnClick>
-						if  IsShiftKeyDown()  then
-							BuyPoisonsItemButton_OnShiftClick();
-						else
-							BuyPoisonsItemButton_OnClick(arg1);
-						end
+						BuyPoisonsItemButton_OnClick(arg1);
 					</OnClick>
 					<OnLoad>
 						BuyPoisonsItemButton_OnLoad();
 					</OnLoad>
 					<OnDragStart>
-						BuyPoisonsItemButton_OnClick("LeftButton");
+						BuyPoisonsItemButton_OnClick("LeftButton", 1);
 					</OnDragStart>
 					<OnEnter>
 						BuyPoisonsTooltip:SetOwner(this, "ANCHOR_RIGHT");
-						--GameTooltip:SetBuyPoisonsItem(this:GetID());
+						--BuyPoisonsTooltip:SetBuyPoisonsItem(this:GetID());
 
 						ShowMerchantSellCursor(1);
 					</OnEnter>
@@ -114,9 +110,9 @@
 			<AbsDimension x="384" y="512"/>
 		</Size>
 		<Anchors>
-			<Anchor point="TOPLEFT">
+			<Anchor point="RIGHT" relativeTo="MerchantFrame">
 				<Offset>
-					<AbsDimension x="0" y="-104"/>
+					<AbsDimension x="350" y="0"/>
 				</Offset>
 			</Anchor>
 		</Anchors>
