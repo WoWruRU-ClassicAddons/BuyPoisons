@@ -3,14 +3,14 @@
     <!-- Source -->
 	<Script file="BuyPoisons.lua"/>
 	<Script file="BuyPoisonsFrame.lua"/>
-	<Script file="BuyPoisonsConfigFrame.lua"/>
 	<Script file="Restock.lua"/>
 	<Script file="Poisons.lua"/>
 	
 	<!-- Localisation -->
-       <Script file="localization_en.lua"/>
-       <Script file="localization_fr.lua"/>
-       <Script file="localization_de.lua"/>
+       <Include file="Locale\localization_en.lua"/>
+       <Include file="Locale\localization_fr.lua"/>
+       <Include file="Locale\localization_de.lua"/>
+       <Include file="Locale\localization_ru.lua"/>
     
 	<Frame name="BuyPoisonsItemTemplate" virtual="true">	
 		<Size>
@@ -63,7 +63,7 @@
 				</Anchors>
 				<Scripts>
 					<OnClick>
-						if ( IsShiftKeyDown() ) then
+						if  IsShiftKeyDown()  then
 							BuyPoisonsItemButton_OnShiftClick();
 						else
 							BuyPoisonsItemButton_OnClick(arg1);
@@ -86,7 +86,7 @@
 						ResetCursor();
 					</OnLeave>
 					<OnHide>
-						if ( this.hasStackSplit == 1 ) then
+						if  this.hasStackSplit == 1  then
 							StackSplitFrame:Hide();
 						end
 					</OnHide>
@@ -125,7 +125,7 @@
 		</HitRectInsets>
 		<Layers>
 			<Layer level="BACKGROUND">
-				<Texture name="MerchantFramePortrait">
+				<Texture name="BuyPoisonsFramePortrait">
                     <Size>
                         <AbsDimension x="60" y="60"/>
                     </Size>

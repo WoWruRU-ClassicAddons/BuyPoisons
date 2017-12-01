@@ -1,10 +1,8 @@
 ## Interface: 11200
 ## Title: Buy Poisons
 ## Notes: Buy Stacks of Poison Components
-## OptionalDeps:
-## Dependencies:
+## Notes_ruRU: Покупка ингридиентов для ядов.
+## Version: 4.4
 ## SavedVariables: BuyPoisonsData
+
 BuyPoisons.xml
-BuyPoisonsConfig.xml
-
-
